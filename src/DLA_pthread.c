@@ -42,7 +42,7 @@ void *popolaParticelle(void *rank){ //funzione che inizializza i parametri delle
 	int p; //indice del for
 	int local_start = P-zp; //indice delle particella iniziale del thread
 	int local_finsih = local_start+(local_n-1); //indice della particella finale del thread
-	zp=zp-local_n; //aggiorno la variabile di appogio
+	zp=zp-local_n; //aggiorno la variabile di appoggio
 	
 	for(p=local_start;p<=local_finsih;p++){ //per ogni particella
 		int randx = rand()%X;  //prendo coordinata X casuale
