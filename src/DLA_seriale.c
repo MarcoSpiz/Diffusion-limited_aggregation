@@ -61,6 +61,9 @@ void main(int argc, char *argv[])
 	}	
 
 	for(int mosse=0;mosse<M;mosse++){ //iterazione delle mosse
+		//printf("\n\n\n");
+		//stampa(*cristallo,*campo, semeX, semeY,X);
+		//usleep(100000);  //DEBUGGING
 		for(int p=0;p<P;p++){         //iterazione delle particelle
 			if(parti[p].cristallo==false){ ///se non sono un cristallo
 				int x = parti[p].x; //prendo coordinata X della particella
@@ -79,7 +82,7 @@ void main(int argc, char *argv[])
 					parti[p].x=min(x+rx,X-1);	//funzione min 
 					parti[p].y=min(y+ry,X-1);	//funzione min
 					//campo[y][x]=0; //DEBUGGING
-					//campo[parti[p].y][parti[p].x]=nt+1; //DEBUGGING
+					//campo[parti[p].y][parti[p].x]=1; //DEBUGGING
 				}
 			}
 		}	

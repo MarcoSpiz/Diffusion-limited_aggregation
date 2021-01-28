@@ -14,7 +14,7 @@ void stampa(int *cristallo, int *campo, int semeX, int semeY, int X){ //funzione
 			if(x==semeX && y==semeY) printf("\x1b[31m" "██" "\x1b[0m"); //se seme: quadrato rosso
 			else if(cristallo[X*y+x]>=20) printf("██");//se cristallo: quadrato bianco
 			else if(cristallo[X*y+x]>0) printf("||");//se area: || (DEBBUGING)
-		//	else if(campo[X*y+x]!=0) printf("\x1b[%dm" "* " "\x1b[0m",campo[X*y+x]+31);  //DEBBUGING      
+			//else if(campo[X*y+x]!=0) printf("\x1b[%dm" "* " "\x1b[0m",campo[X*y+x]+31);  //DEBBUGING      
 			else printf("  ");
 		printf("|\n");
 	}
@@ -73,6 +73,12 @@ void main(int argc, char *argv[])
 	}	
 	
 	for(int mosse=0;mosse<M;mosse++){ //iterazione delle mosse
+		//#pragma omp master
+		//{
+		//	printf("\n\n\n");
+		//	stampa(*cristallo,*campo, semeX, semeY,X); 
+		//	usleep(100000);  //DEBUGGING
+		//}
 		#pragma omp for reduction(+:cristalli)
 		for(int p=0;p<P;p++){         //iterazione delle particelle
 			if(parti[p].cristallo==false){ ///se non sono un cristallo
@@ -90,11 +96,12 @@ void main(int argc, char *argv[])
 					int ry = ((p + mosse + y )%3)-1; //generazione numero pseudo casuale
 					parti[p].x=min(x+rx,X-1);	//funzione min 
 					parti[p].y=min(y+ry,X-1);	//funzione min
+					//int nt = omp_get_thread_num(); //DEBUGGING
 					//#pragma omp critical //DEBUGGING
-					//{
+					//{ //DEBUGGING
 					//campo[y][x]=0; //DEBUGGING
 					//campo[parti[p].y][parti[p].x]=nt+1; //DEBUGGING
-					//}
+					//} //DEBUGGING
 				}
 			}
 		}		
