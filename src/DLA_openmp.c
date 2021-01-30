@@ -13,8 +13,8 @@ void stampa(int *cristallo, int *campo, int semeX, int semeY, int X){ //funzione
 		for(int x=0;x<X;x++) //iterazioni su dim Matrice
 			if(x==semeX && y==semeY) printf("\x1b[31m" "██" "\x1b[0m"); //se seme: quadrato rosso
 			else if(cristallo[X*y+x]>=20) printf("██");//se cristallo: quadrato bianco
-			else if(cristallo[X*y+x]>0) printf("||");//se area: || (DEBBUGING)
-			//else if(campo[X*y+x]!=0) printf("\x1b[%dm" "* " "\x1b[0m",campo[X*y+x]+31);  //DEBBUGING      
+			else if(cristallo[X*y+x]>0) printf("||");//se area: || (DEBUGGING)
+			else if(campo[X*y+x]!=0) printf("\x1b[%dm" "* " "\x1b[0m",campo[X*y+x]+31);  //DEBUGGING      
 			else printf("  ");
 		printf("|\n");
 	}
@@ -24,7 +24,7 @@ void creaArea(int y, int x, int *cristallo,int X){  //funzione che crea l'area d
 	if(y>0 && x>0)cristallo[X*(y-1)+(x-1)]+=1; //alto sinistra
    	if(y>0)cristallo[X*(y-1)+x]+=1;  //alto
    	if(y>0 && x<X-1)cristallo[X*(y-1)+(x+1)]+=1; //alto destra
-	if(x>0)cristallo[X*y+(x-1)]+=1; //solo sinistra
+	if(x>0)cristallo[X*y+(x-1)]+=1; //sinistra
 	if(x<X-1)cristallo[X*y+(x+1)]+=1; //destra
 	if(y<X-1 && x>0)cristallo[X*(y+1)+(x-1)]+=1; //basso sinistra
 	if(y<X-1)cristallo[X*(y+1)+x]+=1; //giu
@@ -37,28 +37,29 @@ void main(int argc, char *argv[])
     	
     int X=strtol(argv[1],NULL,10); //input dimensione matrice
 	int P=strtol(argv[2],NULL,10); //input numero particelle
-	int M=strtol(argv[3],NULL,10); //input numero thread
+	int M=strtol(argv[3],NULL,10); //input numero mosse
 	int NUM_THREAD=strtol(argv[4],NULL,10); //numero thread preso a tempo di esecuzione
 	int cristallo[X][X]; //dichiarazione matrice
-	//int campo[X][X]; //DEBUGGING
+	int campo[X][X]; //DEBUGGING
+	omp_set_num_threads(NUM_THREAD); //set numero thread
 	#pragma omp parallel for collapse(2) 
 	for(int i=0;i<X;i++){ //inzializzazione a 0 della matrice
 		for(int j=0;j<X;j++){
 			cristallo[i][j]=0;
-			//campo[i][j]=0;//DEBUGGING
+			campo[i][j]=0;//DEBUGGING
 		}
 	}
 
     	
-    int semeX = X/2;//rand()%X; //coordinata X seme iniziale 
-    int semeY = X/2;//rand()%Y; //coordianta Y seme iniziale
+    int semeX = rand()%X; //coordinata X seme iniziale 
+    int semeY = rand()%X; //coordianta Y seme iniziale
     cristallo[semeY][semeX]=20;	 //posizionamento seme nelle matrice
     //generazione area circostante al seme
 	creaArea(semeY,semeX,*cristallo,X);
-	int cristalli=0; //contatore particelle trasformate ini cristallo
+	int cristalli=0; //contatore particelle trasformate in cristallo
 	
 	struct Particella parti[P]; //struttura particelle
-	omp_set_num_threads(NUM_THREAD); //set numero thread
+	
 	
 	#pragma omp parallel
 	{
@@ -69,7 +70,7 @@ void main(int argc, char *argv[])
 		parti[p].x = randx;    //assegnazione coordinata
 		parti[p].y = randy;    //assegnazione coordinata
 		parti[p].cristallo = false; //assegnazione a NON cristallo
-		//campo[randy][randx]=1; //DEBUGGING
+		campo[randy][randx]=1; //DEBUGGING
 	}	
 	
 	for(int mosse=0;mosse<M;mosse++){ //iterazione delle mosse
@@ -86,29 +87,31 @@ void main(int argc, char *argv[])
 				int y = parti[p].y; //prendo coordinata Y della particella
 				if(cristallo[y][x]>0){ //se nella matrice alla pos Y,X c'è o area o cristallo	
 					parti[p].cristallo=true; //trasformo particella in cristallo
+					cristalli++; //aumento contatore cristalli
+					#pragma omp critical
+					{
 					cristallo[y][x]=20;	//assegno alla matrice il valore di cristallo
 					//genero area
+					campo[y][x]=0;  //DEBUGGING
 					creaArea(y,x,*cristallo,X);
-  					//campo[y][x]=0;  //DEBUGGING    
-					cristalli++; //aumento contatore cristalli
+					}					    
 				}else{ //non mi trasformo quindi mi muovo
 					int rx = ((p + mosse + x )%3)-1; //generazione numero pseudo casuale
 					int ry = ((p + mosse + y )%3)-1; //generazione numero pseudo casuale
-					parti[p].x=min(x+rx,X-1);	//funzione min 
-					parti[p].y=min(y+ry,X-1);	//funzione min
-					//int nt = omp_get_thread_num(); //DEBUGGING
-					//#pragma omp critical //DEBUGGING
-					//{ //DEBUGGING
-					//campo[y][x]=0; //DEBUGGING
-					//campo[parti[p].y][parti[p].x]=nt+1; //DEBUGGING
-					//} //DEBUGGING
+					parti[p].x=min(x+rx,X-1);	//validazione coordinate
+					parti[p].y=min(y+ry,X-1);	//validazione coordinate
+					int nt = omp_get_thread_num(); //DEBUGGING
+					#pragma omp critical //DEBUGGING
+					{ //DEBUGGING
+					campo[y][x]=0; //DEBUGGING
+					campo[parti[p].y][parti[p].x]=nt+1; //DEBUGGING
+					} //DEBUGGING
 				}
 			}
 		}		
 	}
 	}//pragma
-	//printf("------------------------------\n");
-	//stampa(*cristallo,*campo, semeX, semeY,X); //stampa cristallo finale
 
-   printf("Matrice %dx%d    %d/%d    mosse:%d \n",X,X,cristalli,P,M); //stampa informazioni
+	//stampa(*cristallo,*campo, semeX, semeY,X); //stampa cristallo finale
+	printf("Matrice %dx%d    %d/%d    mosse:%d \n",X,X,cristalli,P,M); //stampa informazioni
 }/*main*/

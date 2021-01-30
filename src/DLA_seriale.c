@@ -13,8 +13,8 @@ void stampa(int *cristallo, int *campo, int semeX, int semeY, int X){ //funzione
 		for(int x=0;x<X;x++) //iterazioni su dim Matrice
 			if(x==semeX && y==semeY) printf("\x1b[31m" "██" "\x1b[0m"); //se seme: quadrato rosso
 			else if(cristallo[X*y+x]>=20) printf("██");//se cristallo: quadrato bianco
-			else if(cristallo[X*y+x]>0) printf("||");//se area: || (DEBBUGING)
-			//else if(campo[X*y+x]!=0) printf("\x1b[%dm" "* " "\x1b[0m",campo[X*y+x]+31);  //DEBBUGING      
+			else if(cristallo[X*y+x]>0) printf("||");//se area: || (DEBUGGING)
+			else if(campo[X*y+x]!=0) printf("\x1b[%dm" "* " "\x1b[0m",campo[X*y+x]+31);  //DEBUGGING      
 			else printf("  ");
 		printf("|\n");
 	}
@@ -23,7 +23,7 @@ void creaArea(int y, int x, int *cristallo,int X){  //funzione che crea l'area d
 	if(y>0 && x>0)cristallo[X*(y-1)+(x-1)]+=1; //alto sinistra
    	if(y>0)cristallo[X*(y-1)+x]+=1;  //alto
    	if(y>0 && x<X-1)cristallo[X*(y-1)+(x+1)]+=1; //alto destra
-	if(x>0)cristallo[X*y+(x-1)]+=1; //solo sinistra
+	if(x>0)cristallo[X*y+(x-1)]+=1; //sinistra
 	if(x<X-1)cristallo[X*y+(x+1)]+=1; //destra
 	if(y<X-1 && x>0)cristallo[X*(y+1)+(x-1)]+=1; //basso sinistra
 	if(y<X-1)cristallo[X*(y+1)+x]+=1; //giu
@@ -34,18 +34,18 @@ void main(int argc, char *argv[])
 	srand(time(NULL));        //inizializzazione rand generator 
     int X=strtol(argv[1],NULL,10); //input dimensione matrice
 	int P=strtol(argv[2],NULL,10); //input numero particelle
-	int M=strtol(argv[3],NULL,10); //input numero thread
+	int M=strtol(argv[3],NULL,10); //input numero mosse
 	int cristallo[X][X]; //dichiarazione matrice
-	//int campo[X][X];
+	int campo[X][X]; //DEBUGGING
 	for(int i=0;i<X;i++){ //inzializzazione a 0 della matrice
 		for(int j=0;j<X;j++){
 			cristallo[i][j]=0;
-			//campo[i][j]=0;//DEBUGGING
+			campo[i][j]=0;//DEBUGGING
 		}
 	}
 	struct Particella parti[P]; //struttura particelle    	
- 	int semeX = X/2;//rand()%X; //coordinata X seme iniziale 
-    int semeY = X/2;//rand()%Y; //coordianta Y seme iniziale
+ 	int semeX = rand()%X; //coordinata X seme iniziale 
+    int semeY = rand()%X; //coordianta Y seme iniziale
     cristallo[semeY][semeX]=20;	 //posizionamento seme nelle matrice
        //generazione area circostante al seme
   	creaArea(semeY,semeX,*cristallo,X);    
@@ -57,12 +57,12 @@ void main(int argc, char *argv[])
 		parti[p].x = randx;    //assegnazione coordinata
 		parti[p].y = randy;    //assegnazione coordinata
 		parti[p].cristallo = false; //assegnazione a NON cristallo
-		//campo[randy][randx]=1; //DEBUGGING
+		campo[randy][randx]=1; //DEBUGGING
 	}	
 
 	for(int mosse=0;mosse<M;mosse++){ //iterazione delle mosse
-		//printf("\n\n\n");
-		//stampa(*cristallo,*campo, semeX, semeY,X);
+		//printf("\n\n\n"); //DEBUGGING
+		//stampa(*cristallo,*campo, semeX, semeY,X); //DEBUGGING
 		//usleep(100000);  //DEBUGGING
 		for(int p=0;p<P;p++){         //iterazione delle particelle
 			if(parti[p].cristallo==false){ ///se non sono un cristallo
@@ -73,16 +73,15 @@ void main(int argc, char *argv[])
 					cristallo[y][x]=20;	//assegno alla matrice il valore di cristallo
 					//genero area
 				   	creaArea(y,x, *cristallo,X);
-					//campo[y][x]=0;  //DEBUGGING                                
+					campo[y][x]=0;  //DEBUGGING                                
 					cristalli++; //aumento contatore cristalli
 				}else{ //non mi trasformo quindi mi muovo
-					//numero thread
 					int rx = ((p + mosse + x )%3)-1; //generazione numero pseudo casuale
 					int ry = ((p + mosse + y )%3)-1; //generazione numero pseudo casuale
-					parti[p].x=min(x+rx,X-1);	//funzione min 
-					parti[p].y=min(y+ry,X-1);	//funzione min
-					//campo[y][x]=0; //DEBUGGING
-					//campo[parti[p].y][parti[p].x]=1; //DEBUGGING
+					parti[p].x=min(x+rx,X-1);	//validazione coordinate
+					parti[p].y=min(y+ry,X-1);	//validazione coordinate
+					campo[y][x]=0; //DEBUGGING
+					campo[parti[p].y][parti[p].x]=1; //DEBUGGING
 				}
 			}
 		}	

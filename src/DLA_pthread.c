@@ -1,20 +1,21 @@
 #include "dla.h"
 #include <pthread.h>
 int X, M, P, NUM_THREAD; //dichiarazione valori dimensione matrice, mosse, particelle e numero thread
+int semeX,semeY; //coordinate seme
 struct Particella *parti; //dichiarazione struttura che contiente le informazioni delle particelle
 pthread_mutex_t lock;  //lock 
 int **cristallo;	//dichiarazione matrice 	
 int cristalli=0; //contatore particelle trasformate ini cristallo
-//int **campo;     // DEBUGGING	
-int zp; //variabile di appogio per la suddivisione del carico tra thread
+int **campo;     // DEBUGGING	
+int zp; //variabile di appoggio per la suddivisione del carico tra thread
 
-void stampa(int semeX, int semeY){ //funzione stampa
+void stampa(){ //funzione stampa
 	for(int y=0;y<X;y++){ //iterazioni su dim Matrice
 		for(int x=0;x<X;x++) //iterazioni su dim Matrice
 			if(x==semeX && y==semeY) printf("\x1b[31m" "██" "\x1b[0m"); //se seme: quadrato rosso
 			else if(cristallo[y][x]>=20) printf("██");//se cristallo: quadrato bianco
-			else if(cristallo[y][x]>0) printf("||");//se area: || (DEBBUGING)
-			//else if(campo[y][x]!=0) printf("\x1b[%dm" "* " "\x1b[0m",campo[y][x]+31);  //DEBBUGING      
+			else if(cristallo[y][x]>0) printf("||");//se area: || (DEBUGGING)
+			else if(campo[y][x]!=0) printf("\x1b[%dm" "* " "\x1b[0m",campo[y][x]+31);  //DEBUGGING      
 			else printf("  "); 
 		printf("|\n");
 	}
@@ -39,18 +40,20 @@ void *popolaParticelle(void *rank){ //funzione che inizializza i parametri delle
 			}
 		} 
 	}
+
 	int p; //indice del for
 	int local_start = P-zp; //indice delle particella iniziale del thread
 	int local_finsih = local_start+(local_n-1); //indice della particella finale del thread
+	pthread_mutex_lock(&lock);
 	zp=zp-local_n; //aggiorno la variabile di appoggio
-	
+	pthread_mutex_unlock(&lock);
 	for(p=local_start;p<=local_finsih;p++){ //per ogni particella
 		int randx = rand()%X;  //prendo coordinata X casuale
 		int randy = rand()%X;  //prendo coordinata Y casuale
 		parti[p].x = randx;    //assegno coordinata
 		parti[p].y = randy;    //assegno coordinata
 		parti[p].cristallo = false;  //assegno il valore di NON cristallo
-		//campo[randy][randx]=1; //DEBUGGING
+		campo[randy][randx]=1; //DEBUGGING
 	}	
 	return NULL;
 }/*popolaParticelle*/
@@ -59,7 +62,7 @@ void creaArea(int y,int x){  //funzione che crea l'area del cristallo
 	if(y>0 && x>0)cristallo[(y-1)][(x-1)]+=1; //alto sinistra
    	if(y>0)cristallo[(y-1)][x]+=1;  //alto
    	if(y>0 && x<X-1)cristallo[(y-1)][(x+1)]+=1; //alto destra
-	if(x>0)cristallo[y][(x-1)]+=1; //solo sinistra
+	if(x>0)cristallo[y][(x-1)]+=1; //sinistra
 	if(x<X-1)cristallo[y][(x+1)]+=1; //destra
 	if(y<X-1 && x>0)cristallo[(y+1)][(x-1)]+=1; //basso sinistra
 	if(y<X-1)cristallo[(y+1)][x]+=1; //giu
@@ -82,11 +85,13 @@ void *movimento(void *rank){  //funzione che muove le particelle
 	int p; //indice del for
 	int local_start = P-zp; //indice delle particella iniziale del thread
 	int local_finsih = local_start+(local_n-1); //indice della particella finale del thread
-	zp=zp-local_n; //aggiorno la variabile di appogio
+	pthread_mutex_lock(&lock);
+	zp=zp-local_n; //aggiorno la variabile di appoggio
+	pthread_mutex_unlock(&lock);
 	for(int mosse=0;mosse<M;mosse++){ //per ogni mossa
-			//printf("\n\n\n"); //DEBUGGIN
-			//stampa(semeX,semeY); //DEBUGGIN
-			//usleep(100000);  //DEBUGGING
+		//printf("\n\n\n"); //DEBUGGING
+		//stampa(); //DEBUGGING
+		//usleep(100000);  //DEBUGGING
 		for(p=local_start;p<=local_finsih;p++){ //per ogni particella
 			if(parti[p].cristallo==false){ ///se non sono un cristallo
 				int x = parti[p].x; //prendo coordinata X della particella
@@ -96,18 +101,18 @@ void *movimento(void *rank){  //funzione che muove le particelle
 					pthread_mutex_lock(&lock); //lock della sezione critica
 					cristallo[y][x]=20;	//assegno alla matrice il valore di cristallo
 					cristalli++;
-					//campo[y][x]=0; //DEBUGGIN
+					campo[y][x]=0; //DEBUGGING
 					creaArea(y,x); //crea area
 					pthread_mutex_unlock(&lock); //unlock della sezione critica
 				}else{ //non mi trasformo quindi mi muovo
 					int rx = ((p + x + mosse)%3)-1; //generazione numero pseudo casuale
 					int ry = ((p + y + mosse)%3)-1; //generazione numero pseudo casuale
-					parti[p].x=min(x+rx,X-1);	//funzione min 
-					parti[p].y=min(y+ry,X-1);	//funzione min
-					//pthread_mutex_lock(&lock); //DEBUGGING
-					//campo[y][x]=0; //DEBUGGIN
-					//campo[parti[p].y][parti[p].x]=m_rank+1;  //DEBUGGING
-					//pthread_mutex_unlock(&lock); //DEBUGGING
+					parti[p].x=min(x+rx,X-1);	//validazione coordinate 
+					parti[p].y=min(y+ry,X-1);	//validazione coordinate
+					pthread_mutex_lock(&lock); //DEBUGGING
+					campo[y][x]=0; //DEBUGGING
+					campo[parti[p].y][parti[p].x]=m_rank+1;  //DEBUGGING
+					pthread_mutex_unlock(&lock); //DEBUGGING
 
 				}
 			}
@@ -121,17 +126,17 @@ int main(int argc, char *argv[]){
 	NUM_THREAD=strtol(argv[4],NULL,10); //prendo il numero di thread
 	parti = malloc(sizeof(struct Particella)*P); //dichiaro dimensione array particelle
 	cristallo =(int **)malloc(sizeof(int*)*X); //dichiaro dimensione matrice 
-	//campo =(int **)malloc(sizeof(int*)*X); //DEBUGGING
+	campo =(int **)malloc(sizeof(int*)*X); //DEBUGGING
 
 	srand(time(NULL));       //inizializzazione rand generator
-	int semeX = X/2;//rand()%X; //coordinata X seme iniziale 
-    int semeY = X/2;//rand()%Y; //coordianta Y seme iniziale
+	semeX = rand()%X; //coordinata X seme iniziale 
+    semeY = rand()%X; //coordianta Y seme iniziale
     for(int i=0;i<X;i++){ 
     	cristallo[i]=(int*)malloc(sizeof(int)*X); //dichiaro dimensione riga della matrice
-    	//campo[i]=(int*)malloc(sizeof(int)*X); //DEBUGGING
+    	campo[i]=(int*)malloc(sizeof(int)*X); //DEBUGGING
 		for(int j=0;j<X;j++){
 			cristallo[i][j]=0; //inizializzo a zero
-		//	campo[i][j]=0; //DEBUGGING
+			campo[i][j]=0; //DEBUGGING
 		}
 	} 
 	cristallo[semeY][semeX]=20;	 //posizionamento seme nelle matrice
@@ -156,9 +161,9 @@ int main(int argc, char *argv[]){
 	}
 	
 	free(t_h);
-	//stampa(semeX,semeY);
+	//stampa();
 	printf("Matrice %dx%d	%d/%d	mosse:%d \n",X,X,cristalli,P,M); //stampa informazioni
-	//free(campo);
+	free(campo);
 	free(cristallo);
 	free(parti);	
 	return 0;
