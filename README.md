@@ -6,6 +6,8 @@ Inoltre nella cartella "src" è presente un file nominato "dla.h" che contiente 
 
 Il file nominato "test.sh" contiene un semplice script bash che, preso in input la dimensione della matrice, compila i codici sorgente di ogni implementazione e li esegue con diverso numero di particelle e mosse per ogni versione.
 
+Nella cartella "Esempi" sono presenti diverse immagini/gif della creazione di cristalli.
+
 # Esecuzione del codice
 
 Ogni programma può essere singolarmente eseguito passando in input la dimensione della matrice, il numero di particelle, il numero di mosse e il numero di thread per le implementazione parallele.
