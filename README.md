@@ -27,4 +27,4 @@ Il valore *X* è la dimensione del lato della matrice, il valore *Y* il numero d
  # Utilizzo delle funzioni stampa
  
 In tutti sorgenti sono presenti delle linee di codice commentate riconoscibili con il commento "//DEBUGGING", esse se oppurtunamente decomentate forniscono una stampa progressiva della formazione del cristallo oppure semplicemente del risultato finale, nella stampa progressiva ogni particella ancora non trasformata è rappresentata da una stellina colorta (un colore diverso a seconda del thread, per la versione single-thread avranno tutte colore uguale).
-Per rappresentare l'intera area della matrice bisogna ridurre le dimensioni dei caratteri e non superare i 250 i lato.
+Per rappresentare l'intera area della matrice bisogna ridurre le dimensioni dei caratteri e non superare i 250 di lato.
