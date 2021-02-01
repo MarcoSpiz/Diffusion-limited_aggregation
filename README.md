@@ -4,7 +4,7 @@ Nella cartella "src" sono presenti i tre codici sorgenti nominati DLA_ (seriale,
 
 Inoltre nella cartella "src" è presente un file nominato "dla.h" che contiente tutti i file header per il funzionamento del codice e una struttura in comune per tutte le implementazioni.
 
-Il file nominato "test.sh" contiene un semplice script bash che, preso in input la dimensione della matrice, compila i codici sorgente di ogni implementazione e li esegue con diverso numero di particelle e mosse per ogni versione.
+Il file nominato "test.sh" contiene un semplice script bash che, preso in input la dimensione della matrice (non superiore a 1300), compila i codici sorgente di ogni implementazione e li esegue con diverso numero di particelle e mosse per ogni versione.
 
 Nella cartella "Esempi" sono presenti diverse immagini/gif della creazione di cristalli.
 
@@ -25,4 +25,5 @@ Il valore *X* è la dimensione del lato della matrice, il valore *Y* il numero d
  
  # Utilizzo delle funzioni stampa
  
-In tutti sorgenti sono presenti delle linee di codice commentate riconoscibili con il commento "//DEBUGGING", esse se oppurtunamente decomentate forniscono una stampa progressiva della formazione del cristallo oppure semplicemente del risultato finale, nella stampa progressiva ogni particella ancora non trasformata è rappresentata da una stellina colorta (un colore diverso a seconda del thread, per la versione single-thread avranno tutte colore uguale)
+In tutti sorgenti sono presenti delle linee di codice commentate riconoscibili con il commento "//DEBUGGING", esse se oppurtunamente decomentate forniscono una stampa progressiva della formazione del cristallo oppure semplicemente del risultato finale, nella stampa progressiva ogni particella ancora non trasformata è rappresentata da una stellina colorta (un colore diverso a seconda del thread, per la versione single-thread avranno tutte colore uguale).
+Per rappresentare l'intera area della matrice bisogna ridurre le dimensioni dei caratteri e non superare i 250 i lato.
