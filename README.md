@@ -14,6 +14,7 @@ Ogni programma può essere singolarmente eseguito passando in input la dimension
 
 Esempio:
   ./dla_pthread *X* *Y* *Z* *W* 
+  
 Il valore *X* è la dimensione del lato della matrice, il valore *Y* il numero delle particelle, il valore *Z* è il numero di mossse e *W* il numero di thread.
  
  Si possono eseguire contemporanemente usando lo script test.sh passando in input la dimensione del lato della matrice
