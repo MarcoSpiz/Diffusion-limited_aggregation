@@ -15,7 +15,7 @@ void stampa(){ //funzione stampa
 			if(x==semeX && y==semeY) printf("\x1b[31m" "██" "\x1b[0m"); //se seme: quadrato rosso
 			else if(cristallo[y][x]>=20) printf("██");//se cristallo: quadrato bianco
 			else if(cristallo[y][x]>0) printf("||");//se area: || (DEBUGGING)
-			else if(campo[y][x]!=0) printf("\x1b[%dm" "* " "\x1b[0m",campo[y][x]+31);  //DEBUGGING      
+			//else if(campo[y][x]!=0) printf("\x1b[%dm" "* " "\x1b[0m",campo[y][x]+31);  //DEBUGGING      
 			else printf("  "); 
 		printf("|\n");
 	}
@@ -53,7 +53,7 @@ void *popolaParticelle(void *rank){ //funzione che inizializza i parametri delle
 		parti[p].x = randx;    //assegno coordinata
 		parti[p].y = randy;    //assegno coordinata
 		parti[p].cristallo = false;  //assegno il valore di NON cristallo
-		campo[randy][randx]=1; //DEBUGGING
+		//campo[randy][randx]=1; //DEBUGGING
 	}	
 	return NULL;
 }/*popolaParticelle*/
@@ -101,7 +101,7 @@ void *movimento(void *rank){  //funzione che muove le particelle
 					pthread_mutex_lock(&lock); //lock della sezione critica
 					cristallo[y][x]=20;	//assegno alla matrice il valore di cristallo
 					cristalli++;
-					campo[y][x]=0; //DEBUGGING
+					//campo[y][x]=0; //DEBUGGING
 					creaArea(y,x); //crea area
 					pthread_mutex_unlock(&lock); //unlock della sezione critica
 				}else{ //non mi trasformo quindi mi muovo
@@ -109,10 +109,10 @@ void *movimento(void *rank){  //funzione che muove le particelle
 					int ry = ((p + y + mosse)%3)-1; //generazione numero pseudo casuale
 					parti[p].x=min(x+rx,X-1);	//validazione coordinate 
 					parti[p].y=min(y+ry,X-1);	//validazione coordinate
-					pthread_mutex_lock(&lock); //DEBUGGING
-					campo[y][x]=0; //DEBUGGING
-					campo[parti[p].y][parti[p].x]=m_rank+1;  //DEBUGGING
-					pthread_mutex_unlock(&lock); //DEBUGGING
+					//pthread_mutex_lock(&lock); //DEBUGGING
+					//campo[y][x]=0; //DEBUGGING
+					//campo[parti[p].y][parti[p].x]=m_rank+1;  //DEBUGGING
+					//pthread_mutex_unlock(&lock); //DEBUGGING
 
 				}
 			}
@@ -133,10 +133,10 @@ int main(int argc, char *argv[]){
     semeY = rand()%X; //coordianta Y seme iniziale
     for(int i=0;i<X;i++){ 
     	cristallo[i]=(int*)malloc(sizeof(int)*X); //dichiaro dimensione riga della matrice
-    	campo[i]=(int*)malloc(sizeof(int)*X); //DEBUGGING
+    	//campo[i]=(int*)malloc(sizeof(int)*X); //DEBUGGING
 		for(int j=0;j<X;j++){
 			cristallo[i][j]=0; //inizializzo a zero
-			campo[i][j]=0; //DEBUGGING
+			//campo[i][j]=0; //DEBUGGING
 		}
 	} 
 	cristallo[semeY][semeX]=20;	 //posizionamento seme nelle matrice

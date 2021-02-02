@@ -14,7 +14,7 @@ void stampa(int *cristallo, int *campo, int semeX, int semeY, int X){ //funzione
 			if(x==semeX && y==semeY) printf("\x1b[31m" "██" "\x1b[0m"); //se seme: quadrato rosso
 			else if(cristallo[X*y+x]>=20) printf("██");//se cristallo: quadrato bianco
 			else if(cristallo[X*y+x]>0) printf("||");//se area: || (DEBUGGING)
-			else if(campo[X*y+x]!=0) printf("\x1b[%dm" "* " "\x1b[0m",campo[X*y+x]+31);  //DEBUGGING      
+		//	else if(campo[X*y+x]!=0) printf("\x1b[%dm" "* " "\x1b[0m",campo[X*y+x]+31);  //DEBUGGING      
 			else printf("  ");
 		printf("|\n");
 	}
@@ -46,7 +46,7 @@ void main(int argc, char *argv[])
 	for(int i=0;i<X;i++){ //inzializzazione a 0 della matrice
 		for(int j=0;j<X;j++){
 			cristallo[i][j]=0;
-			campo[i][j]=0;//DEBUGGING
+			//campo[i][j]=0;//DEBUGGING
 		}
 	}
 
@@ -70,7 +70,7 @@ void main(int argc, char *argv[])
 		parti[p].x = randx;    //assegnazione coordinata
 		parti[p].y = randy;    //assegnazione coordinata
 		parti[p].cristallo = false; //assegnazione a NON cristallo
-		campo[randy][randx]=1; //DEBUGGING
+		//campo[randy][randx]=1; //DEBUGGING
 	}	
 	
 	for(int mosse=0;mosse<M;mosse++){ //iterazione delle mosse
@@ -92,7 +92,7 @@ void main(int argc, char *argv[])
 					{
 					cristallo[y][x]=20;	//assegno alla matrice il valore di cristallo
 					//genero area
-					campo[y][x]=0;  //DEBUGGING
+					//campo[y][x]=0;  //DEBUGGING
 					creaArea(y,x,*cristallo,X);
 					}					    
 				}else{ //non mi trasformo quindi mi muovo
@@ -101,11 +101,11 @@ void main(int argc, char *argv[])
 					parti[p].x=min(x+rx,X-1);	//validazione coordinate
 					parti[p].y=min(y+ry,X-1);	//validazione coordinate
 					int nt = omp_get_thread_num(); //DEBUGGING
-					#pragma omp critical //DEBUGGING
-					{ //DEBUGGING
-					campo[y][x]=0; //DEBUGGING
-					campo[parti[p].y][parti[p].x]=nt+1; //DEBUGGING
-					} //DEBUGGING
+					//#pragma omp critical //DEBUGGING
+					//{ //DEBUGGING
+					//campo[y][x]=0; //DEBUGGING
+					//campo[parti[p].y][parti[p].x]=nt+1; //DEBUGGING
+					//} //DEBUGGING
 				}
 			}
 		}		
